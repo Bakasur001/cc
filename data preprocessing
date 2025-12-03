@@ -1,0 +1,60 @@
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+
+
+df = pd.read_csv("Iris.csv")  
+print("First 5 rows of raw data:")
+print(df.head())
+
+
+df.columns = df.columns.str.strip()     
+df = df.drop_duplicates()               
+df = df.dropna()                       
+
+
+if "Id" in df.columns:
+    df = df.drop(columns=["Id"])
+
+df["PetalArea"] = df["PetalLengthCm"] * df["PetalWidthCm"]
+
+
+le = LabelEncoder()
+df["SpeciesLabel"] = le.fit_transform(df["Species"])
+
+feature_cols = [
+    "SepalLengthCm",
+    "SepalWidthCm",
+    "PetalLengthCm",
+    "PetalWidthCm",
+    "PetalArea"         
+]
+
+X = df[feature_cols]
+y = df["SpeciesLabel"]
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+
+train_df = pd.DataFrame(X_train_scaled, columns=feature_cols)
+test_df = pd.DataFrame(X_test_scaled, columns=feature_cols)
+
+train_df["SpeciesLabel"] = y_train.values
+test_df["SpeciesLabel"] = y_test.values
+
+print("\nProcessed training data (first 5 rows):")
+print(train_df.head())
+
+train_df.to_csv("iris_train_processed_simple.csv", index=False)
+test_df.to_csv("iris_test_processed_simple.csv", index=False)
+
+print("\nSaved: iris_train_processed_simple.csv and iris_test_processed_simple.csv")
