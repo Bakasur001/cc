@@ -1,0 +1,4 @@
+import sagemaker
+session = sagemaker.Session()
+bucket_name = session.default_bucket()
+print(bucket_name)
